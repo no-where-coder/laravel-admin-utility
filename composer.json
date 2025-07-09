@@ -1,5 +1,5 @@
 {
-    "name": "nowhere/admin-utility",
+    "name": "nowhere/laravel-admin-utility",
     "description": "A Laravel admin utility panel with tools like DB viewer, login, impersonation, etc.",
     "type": "library",
     "license": "MIT",
