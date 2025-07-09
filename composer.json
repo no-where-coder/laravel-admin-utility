@@ -1,11 +1,11 @@
 {
-    "name": "nowhere/laravel-admin-utility",
+    "name": "no-where-coder/laravel-admin-utility",
     "description": "A Laravel admin utility panel with tools like DB viewer, login, impersonation, etc.",
     "type": "library",
     "license": "MIT",
     "authors": [
       {
-        "name": "nowhere",
+        "name": "no-where-coder",
         "email": "contact@nowhere.dev"
       }
     ],
