@@ -3,65 +3,43 @@
 namespace Nowhere\AdminUtility\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Artisan;
+use Nowhere\AdminUtility\Contracts\EnvEditorServiceInterface;
 
 class EnvEditorController
 {
-    protected $envDir;
-
-    public function __construct()
-    {
-        $this->envDir = base_path(); // usually contains .env files
-    }
+    public function __construct(
+        protected EnvEditorServiceInterface $envEditor
+    ) {}
 
     public function index()
     {
-        $files = collect(glob(base_path('.env*')))
-        ->map(fn($path) => basename($path))
-        ->values();
-
+        $files = $this->envEditor->listEnvFiles();
         return view('admin-utility::env.index', compact('files'));
     }
 
-    public function edit($filename)
+    public function edit(string $filename)
     {
-        $path = $this->resolveEnvPath($filename);
-
-        if (!File::exists($path)) {
-            abort(404, "$filename not found.");
+        try {
+            $content = $this->envEditor->readEnvFile($filename);
+        } catch (\Throwable $e) {
+            abort(404, $e->getMessage());
         }
 
-        $content = File::get($path);
         return view('admin-utility::env.edit', compact('filename', 'content'));
     }
 
-    public function update(Request $request, $filename)
+    public function update(Request $request, string $filename)
     {
         $request->validate([
             'env_content' => 'required|string',
         ]);
 
-        $path = $this->resolveEnvPath($filename);
-
-        if (!File::exists($path)) {
-            abort(404, "$filename not found.");
-        }
-
-        File::put($path, $request->input('env_content'));
-
-        // Optional: reload config for base `.env` only
-        if ($filename === '.env') {
-            Artisan::call('config:clear');
-            Artisan::call('config:cache');
+        try {
+            $this->envEditor->updateEnvFile($filename, $request->input('env_content'));
+        } catch (\Throwable $e) {
+            return back()->withErrors(['env' => $e->getMessage()]);
         }
 
         return back()->with('success', "$filename updated successfully.");
-    }
-
-    protected function resolveEnvPath($filename)
-    {
-        $safe = basename($filename); // prevent directory traversal
-        return base_path($safe);
     }
 }

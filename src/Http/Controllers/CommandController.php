@@ -3,26 +3,18 @@
 namespace Nowhere\AdminUtility\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
+use Nowhere\AdminUtility\Contracts\ConsoleCommandServiceInterface;
 
 class CommandController
 {
+    public function __construct(
+        protected ConsoleCommandServiceInterface $console
+    ) {}
+
     public function index()
     {
-        $predefined = [
-            'cache:clear',
-            'route:clear',
-            'config:clear',
-            'view:clear',
-            'migrate',
-            'route:list',
-            'optimize:clear',
-            'queue:restart',
-            'schedule:run',
-        ];
-
         return view('admin-utility::artisan.index', [
-            'commands' => $predefined,
+            'commands' => $this->console->predefinedCommands(),
             'output' => null,
             'selected' => null,
         ]);
@@ -41,37 +33,18 @@ class CommandController
             return redirect()->back()->withErrors(['Please provide a command.']);
         }
 
-        // Blacklist unsafe commands
-        $dangerous = [];
-
-        foreach ($dangerous as $black) {
-            if (str_contains($command, $black)) {
-                return redirect()->back()->withErrors(["Command '{$black}' is not allowed."]);
-            }
+        if (!$this->console->isSafeCommand($command)) {
+            return redirect()->back()->withErrors(["Command contains unsafe keywords and was blocked."]);
         }
 
-        // Run command
         try {
-            Artisan::call($command);
-            $output = Artisan::output();
-        } catch (\Exception $e) {
+            $output = $this->console->execute($command);
+        } catch (\Throwable $e) {
             $output = 'Error: ' . $e->getMessage();
         }
 
-        $predefined = [
-            'cache:clear',
-            'route:clear',
-            'config:clear',
-            'view:clear',
-            'migrate',
-            'route:list',
-            'optimize:clear',
-            'queue:restart',
-            'schedule:run',
-        ];
-
         return view('admin-utility::artisan.index', [
-            'commands' => $predefined,
+            'commands' => $this->console->predefinedCommands(),
             'output' => $output,
             'selected' => $command,
         ]);

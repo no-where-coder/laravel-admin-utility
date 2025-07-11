@@ -5,3 +5,4 @@
 - [ ] Create a better UI interface for this
 - [ ] hide routes from routes:list
 - [ ] hide my Controller, services and interface
+- [ ] make sure non of my error come under laravel.log

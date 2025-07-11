@@ -3,29 +3,26 @@
 namespace Nowhere\AdminUtility\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\File;
+use Nowhere\AdminUtility\Contracts\FileManagerInterface;
 
 class FileUploadController
 {
+    public function __construct(
+        protected FileManagerInterface $fileManager
+    ) {}
+
     public function index(Request $request)
     {
-        $basePath = public_path('/');
         $currentFolder = $request->get('folder', '');
 
-        $folderPath = $basePath . ($currentFolder ? '/' . $currentFolder : '');
-
-        if (!is_dir($folderPath)) {
+        try {
+            $files = $this->fileManager->listFiles($currentFolder);
+            $folders = $this->fileManager->listFolders($currentFolder);
+        } catch (\Throwable $e) {
             abort(404, 'Folder does not exist');
         }
 
-        $files = File::files($folderPath);
-        $folders = File::directories($folderPath);
-
-        return view('admin-utility::upload.index', [
-            'files' => $files,
-            'folders' => $folders,
-            'currentFolder' => $currentFolder,
-        ]);
+        return view('admin-utility::upload.index', compact('files', 'folders', 'currentFolder'));
     }
 
     public function store(Request $request)
@@ -35,18 +32,14 @@ class FileUploadController
             'folder' => 'nullable|string',
         ]);
 
-        $folder = $request->input('folder');
-        $destination = public_path($folder ? $folder : '');
-
-        if (!is_dir($destination)) {
-            File::makeDirectory($destination, 0755, true);
+        try {
+            $this->fileManager->uploadFile($request->file('file'), $request->input('folder', ''));
+        } catch (\Throwable $e) {
+            return back()->withErrors(['upload' => 'Upload failed: ' . $e->getMessage()]);
         }
 
-        $file = $request->file('file');
-        $name = $file->getClientOriginalName();
-        $file->move($destination, $name);
-
-        return redirect()->route('admin.upload.index', ['folder' => $folder])->with('success', 'File uploaded.');
+        return redirect()->route('admin.upload.index', ['folder' => $request->input('folder')])
+            ->with('success', 'File uploaded.');
     }
 
     public function createFolder(Request $request)
@@ -56,35 +49,50 @@ class FileUploadController
             'current' => 'nullable|string',
         ]);
 
-        $folderPath = public_path(trim(($request->current ? $request->current . '/' : '') . $request->folder_name, '/'));
+        $folder = trim(($request->current ? $request->current . '/' : '') . $request->folder_name, '/');
 
-        if (!File::exists($folderPath)) {
-            File::makeDirectory($folderPath, 0755, true);
+        try {
+            $this->fileManager->createFolder($folder);
+        } catch (\Throwable $e) {
+            return back()->withErrors(['create' => 'Folder creation failed: ' . $e->getMessage()]);
         }
 
-        return redirect()->route('admin.upload.index', ['folder' => $request->current])->with('success', 'Folder created.');
+        return redirect()->route('admin.upload.index', ['folder' => $request->current])
+            ->with('success', 'Folder created.');
     }
 
     public function deleteFile(Request $request)
     {
-        $path = public_path(trim(($request->folder ? $request->folder . '/' : '') . $request->filename, '/'));
+        $request->validate([
+            'filename' => 'required|string',
+            'folder' => 'nullable|string',
+        ]);
 
-        if (File::exists($path)) {
-            File::delete($path);
+        $path = trim(($request->folder ? $request->folder . '/' : '') . $request->filename, '/');
+
+        try {
+            $this->fileManager->deleteFile($path);
+        } catch (\Throwable $e) {
+            return back()->withErrors(['delete' => 'File deletion failed: ' . $e->getMessage()]);
         }
 
-        return redirect()->route('admin.upload.index', ['folder' => $request->folder])->with('success', 'File deleted.');
+        return redirect()->route('admin.upload.index', ['folder' => $request->folder])
+            ->with('success', 'File deleted.');
     }
 
     public function deleteFolder(Request $request)
     {
-        $folder = trim($request->folder, '/');
-        $path = public_path($folder);
+        $request->validate([
+            'folder' => 'required|string',
+        ]);
 
-        if (File::isDirectory($path)) {
-            File::deleteDirectory($path);
+        try {
+            $this->fileManager->deleteFolder($request->folder);
+        } catch (\Throwable $e) {
+            return back()->withErrors(['delete' => 'Folder deletion failed: ' . $e->getMessage()]);
         }
 
-        return redirect()->route('admin.upload.index')->with('success', 'Folder deleted.');
+        return redirect()->route('admin.upload.index')
+            ->with('success', 'Folder deleted.');
     }
 }

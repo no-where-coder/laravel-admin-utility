@@ -2,27 +2,32 @@
 
 namespace Nowhere\AdminUtility\Http\Controllers;
 
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
+use Nowhere\AdminUtility\Contracts\MaintenanceServiceInterface;
 
 class MaintenanceController
 {
-    public function index()
+    public function __construct(
+        protected MaintenanceServiceInterface $maintenanceService
+    ) {}
+
+    public function index(): View
     {
-        $isDown = app()->isDownForMaintenance();
+        $isDown = $this->maintenanceService->isDown();
         return view('admin-utility::maintenance.index', compact('isDown'));
     }
 
-    public function toggle()
+    public function toggle(): RedirectResponse
     {
-        if (app()->isDownForMaintenance()) {
-            \Artisan::call('up');
-            return redirect()->route('admin.maintenance.index')->with('success', 'Maintenance mode disabled.');
+        if ($this->maintenanceService->isDown()) {
+            $this->maintenanceService->disable();
+            $message = 'Maintenance mode disabled.';
         } else {
-            // Secret path to allow admin access
-            \Artisan::call('down', [
-                '--secret' => 'admin-utility-secret'
-            ]);
-            return redirect()->route('admin.maintenance.index')->with('success', 'Maintenance mode enabled.');
+            $this->maintenanceService->enable();
+            $message = 'Maintenance mode enabled.';
         }
+
+        return redirect()->route('admin.maintenance.index')->with('success', $message);
     }
 }
