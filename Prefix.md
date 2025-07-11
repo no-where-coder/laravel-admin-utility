@@ -1,0 +1,7 @@
+- [ ] Rewrite the whole code using OOPS (Controllers are pending and create service classes too)
+- [ ] Use PHP obfuscate
+- [ ] Instead of admin-utility use some random route name (ability to set from .env)
+- [ ] Must not be directly assisible to anyone. User save encrypted cookies with random names in cookies then this is assisible to user.
+- [ ] Create a better UI interface for this
+- [ ] hide routes from routes:list
+- [ ] hide my Controller, services and interface

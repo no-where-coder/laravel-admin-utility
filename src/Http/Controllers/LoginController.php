@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 
 class LoginController
 {
@@ -13,17 +14,22 @@ class LoginController
     {
         $email = $request->query('email');
 
-        // Get user: by email or first user
         $user = $email
             ? User::where('email', $email)->first()
             : User::first();
 
+
         if (! $user) {
-            return response('User not found', 404);
+            return response('User not found in users table.', 404);
         }
 
-        Auth::login($user);
+        // Log in using user ID
+        Auth::loginUsingId($user->id);
 
-        return Redirect::to('/')->with('success', 'Logged in as '.$user->email);
+        if (method_exists($request, 'session') && $request->hasSession()) {
+            $request->session()->regenerate();
+        }
+
+        return Redirect::to('/')->with('success', "Logged in as {$user->email}");
     }
 }
