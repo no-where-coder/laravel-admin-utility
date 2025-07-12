@@ -23,9 +23,8 @@ jobs:
       - name: Install Composer Dependencies
         run: composer install --no-dev --prefer-dist --no-progress
 
-
-      - name: Install Scrambler (PHP Obfuscator)
-        run: composer global require scrumble/php-scrambler
+      - name: Install PHP Obfuscator
+        run: composer require --dev naneau/php-obfuscator
 
       - name: Run Build Script
         run: bash scripts/build.sh

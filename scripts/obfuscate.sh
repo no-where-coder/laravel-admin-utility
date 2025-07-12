@@ -1,10 +1,11 @@
 #!/bin/bash
 set -e
 
-echo "🔐 Obfuscating source code..."
+echo "🔐 Obfuscating with naneau/php-obfuscator..."
+
 rm -rf build/obfuscated
 mkdir -p build/obfuscated
 
-php ~/.composer/vendor/bin/scrambler scramble src --output build/obfuscated --config=scrambler.json
+php vendor/naneau/php-obfuscator/obfuscate.php obfuscate.config.php
 
 echo "✅ Obfuscation done"
