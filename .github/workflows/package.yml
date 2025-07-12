@@ -50,11 +50,3 @@ jobs:
           tag_name: ${{ steps.read_version.outputs.new_tag }}
           name: Release ${{ steps.read_version.outputs.new_tag }}
           files: build/package.zip
-
-      - name: Notify Packagist of New Release
-        if: github.event_name == 'push'
-        uses: mnavarrocarter/packagist-update@v1.0
-        with:
-          username: 'nowhere'
-          api_token: ${{ secrets.PACKAGIST_TOKEN }}
-          package_name: 'nowhere/laravel-admin-utility'
