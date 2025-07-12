@@ -1,17 +1,20 @@
 #!/bin/bash
 set -e
 
-echo "🔐 Obfuscating using foobaz/php-obfuscator..."
+echo "🔐 Obfuscating using pmaslak/php-obfuscator..."
 
+# Clean previous build
 rm -rf build/obfuscated
 mkdir -p build/obfuscated
 
-php php-obfuscator/obfuscate run \
+# Run obfuscator via vendor/bin
+php vendor/bin/php-obfuscator \
   --source=src \
   --destination=build/obfuscated \
-  --strip-comments \
-  --rename-variables \
-  --rename-functions \
-  --rename-classes
+  --obfuscate-variable-name \
+  --obfuscate-function-name \
+  --obfuscate-class-name \
+  --obfuscate-property-name \
+  --obfuscate-string-literal
 
 echo "✅ Obfuscation complete"

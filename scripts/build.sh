@@ -11,6 +11,6 @@ echo "📦 Creating ZIP package..."
 mkdir -p build
 cd build/obfuscated
 zip -r ../package.zip . > /dev/null
-cd ../../
+cd ../..
 
 echo "✅ Build complete. Output: build/package.zip"
