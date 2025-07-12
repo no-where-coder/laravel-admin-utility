@@ -26,9 +26,8 @@
       }
     },
     "scripts": {
-      "test": "phpunit",
-      "post-install-cmd": [
-          "Nowhere\\AdminUtility\\Setup\\EnvConfigurator::injectSecureEnv"
+      "post-autoload-dump": [
+        "Nowhere\\AdminUtility\\Setup\\EnvConfigurator::injectSecureEnv"
       ]
     },
     "config": {

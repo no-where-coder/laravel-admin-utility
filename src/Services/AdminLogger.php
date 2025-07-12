@@ -1,6 +1,6 @@
 <?php
 
-namespace Nowhere\AdminUtility\Support;
+namespace Nowhere\AdminUtility\Services;
 
 use Monolog\Logger;
 use Monolog\Handler\NullHandler;
