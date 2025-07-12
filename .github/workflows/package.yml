@@ -1,5 +1,8 @@
 name: Build & Release Composer Package
 
+permissions:
+  contents: write
+
 on:
   push:
     branches: [ main ]
@@ -14,6 +17,9 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
