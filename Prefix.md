@@ -1,8 +1,15 @@
-- [ ] Rewrite the whole code using OOPS (Controllers are pending and create service classes too)
-- [ ] Use PHP obfuscate
+- [x] Rewrite the whole code using OOPS (Controllers are pending and create service classes too)
+- [ ] Automated Build Script in github actions and on git commit time (to handle obfuscation, minify, cleanup, packaging, tagging)
+- [ ] Remove or Ignore Dev Files in Release Build
+- [ ] Security Headers or CSRF Middleware 
+- [ ] defined() Guard to prevent direct file access
+- [ ] Encrypted or Randomized Routes Logic in actual code
+- [ ] .gitattributes File to exclude dev/test files from releases
 - [ ] Instead of admin-utility use some random route name (ability to set from .env)
 - [ ] Must not be directly assisible to anyone. User save encrypted cookies with random names in cookies then this is assisible to user.
-- [ ] Create a better UI interface for this
-- [ ] hide routes from routes:list
-- [ ] hide my Controller, services and interface
-- [ ] make sure non of my error come under laravel.log
+- [ ] Publish as a versioned release
+- [x] Proper versioning in composer.json
+- [x] Create a better UI interface for this
+- [x] hide routes from routes:list
+- [x] hide my Controller, services and interface
+- [x] make sure non of my error come under laravel.log

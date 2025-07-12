@@ -1,0 +1,8 @@
+{
+    "exclude": [],
+    "rename_classes": true,
+    "rename_functions": true,
+    "rename_variables": true,
+    "strip_comments": true,
+    "strip_whitespace": true
+}

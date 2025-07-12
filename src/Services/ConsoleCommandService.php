@@ -4,6 +4,7 @@ namespace Nowhere\AdminUtility\Services;
 
 use Illuminate\Support\Facades\Artisan;
 use Nowhere\AdminUtility\Contracts\ConsoleCommandServiceInterface;
+use Nowhere\AdminUtility\Services\AdminLogger;
 
 class ConsoleCommandService implements ConsoleCommandServiceInterface
 {
@@ -23,6 +24,13 @@ class ConsoleCommandService implements ConsoleCommandServiceInterface
         'rm', 'drop', 'wipe', 'fresh', '--force',
     ];
 
+    protected AdminLogger $logger;
+
+    public function __construct(AdminLogger $logger)
+    {
+        $this->logger = $logger;
+    }
+
     public function predefinedCommands(): array
     {
         return self::PREDEFINED_COMMANDS;
@@ -40,7 +48,13 @@ class ConsoleCommandService implements ConsoleCommandServiceInterface
 
     public function execute(string $command): string
     {
-        Artisan::call($command);
-        return Artisan::output();
+        try {
+            Artisan::call($command);
+            return Artisan::output();
+        } catch (\Throwable $e) {
+            $this->logger->error("ConsoleCommandService execute error: " . $e->getMessage());
+            throw new \RuntimeException("Failed to execute command.");
+        }
     }
 }
+

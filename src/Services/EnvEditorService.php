@@ -5,48 +5,66 @@ namespace Nowhere\AdminUtility\Services;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Nowhere\AdminUtility\Contracts\EnvEditorServiceInterface;
+use Nowhere\AdminUtility\Services\AdminLogger;
 
 class EnvEditorService implements EnvEditorServiceInterface
 {
     protected string $envDirectory;
+    protected AdminLogger $logger;
 
-    public function __construct()
+    public function __construct(AdminLogger $logger)
     {
         $this->envDirectory = base_path();
+        $this->logger = $logger;
     }
 
     public function listEnvFiles(): array
     {
-        return collect(glob($this->envDirectory . '/.env*'))
-            ->map(fn($path) => basename($path))
-            ->values()
-            ->all();
+        try {
+            return collect(glob($this->envDirectory . '/.env*'))
+                ->map(fn($path) => basename($path))
+                ->values()
+                ->all();
+        } catch (\Throwable $e) {
+            $this->logger->error("EnvEditorService listEnvFiles error: " . $e->getMessage());
+            return [];
+        }
     }
 
     public function readEnvFile(string $filename): string
     {
-        $path = $this->resolvePath($filename);
+        try {
+            $path = $this->resolvePath($filename);
 
-        if (!File::exists($path)) {
-            throw new \RuntimeException("File $filename not found.");
+            if (!File::exists($path)) {
+                throw new \RuntimeException("File $filename not found.");
+            }
+
+            return File::get($path);
+        } catch (\Throwable $e) {
+            $this->logger->error("EnvEditorService readEnvFile error: " . $e->getMessage());
+            throw $e;
         }
-
-        return File::get($path);
     }
 
     public function updateEnvFile(string $filename, string $content): void
     {
-        $path = $this->resolvePath($filename);
+        try {
+            $path = $this->resolvePath($filename);
 
-        if (!File::exists($path)) {
-            throw new \RuntimeException("File $filename not found.");
-        }
+            if (!File::exists($path)) {
+                throw new \RuntimeException("File $filename not found.");
+            }
 
-        File::put($path, $content);
+            File::put($path, $content);
 
-        if ($filename === '.env') {
-            Artisan::call('config:clear');
-            Artisan::call('config:cache');
+            if ($filename === '.env') {
+                Artisan::call('config:clear');
+                Artisan::call('config:cache');
+            }
+        } catch (\Throwable $e) {
+            $this->logger->error("EnvEditorService updateEnvFile error: " . $e->getMessage());
+            throw $e;
         }
     }
 
