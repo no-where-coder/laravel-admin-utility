@@ -1,10 +1,10 @@
 - [x] Rewrite the whole code using OOPS (Controllers are pending and create service classes too)
-- [ ] Automated Build Script in github actions and on git commit time (to handle obfuscation, minify, cleanup, packaging, tagging)
-- [ ] Remove or Ignore Dev Files in Release Build
-- [ ] Security Headers or CSRF Middleware 
-- [ ] defined() Guard to prevent direct file access
+- [x] Automated Build Script in github actions and on git commit time (to handle obfuscation, minify, cleanup, packaging, tagging)
+- [x] Remove or Ignore Dev Files in Release Build
+- [x] Security Headers or CSRF Middleware 
+- [x] defined() Guard to prevent direct file access
+- [x] .gitattributes File to exclude dev/test files from releases
 - [ ] Encrypted or Randomized Routes Logic in actual code
-- [ ] .gitattributes File to exclude dev/test files from releases
 - [ ] Instead of admin-utility use some random route name (ability to set from .env)
 - [ ] Must not be directly assisible to anyone. User save encrypted cookies with random names in cookies then this is assisible to user.
 - [ ] Publish as a versioned release

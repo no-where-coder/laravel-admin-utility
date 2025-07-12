@@ -17,9 +17,10 @@ use Nowhere\AdminUtility\Http\Controllers\{
 
 class AdminUtilityRoutes implements RouteGroupInterface
 {
+    protected array $middleware = ['web', 'admin-utility.secure-headers'];
     public function register(): void
     {
-        Route::middleware(['web'])->group(function () {
+        Route::middleware($this->middleware)->group(function () {
             Route::get('/admin-utility/login', [\Nowhere\AdminUtility\Http\Controllers\LoginController::class, 'magicLogin'])->name('admin.magic-login');
             Route::prefix('admin-utility')->group(function() {
                 $this->registerCrudRoutes();

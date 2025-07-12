@@ -5,7 +5,6 @@ namespace Nowhere\AdminUtility;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Request;
 use Nowhere\AdminUtility\Contracts\ConsoleCommandServiceInterface;
 use Nowhere\AdminUtility\Contracts\CrudServiceInterface;
 use Nowhere\AdminUtility\Contracts\DbBackupServiceInterface;
@@ -16,6 +15,7 @@ use Nowhere\AdminUtility\Contracts\MagicLoginServiceInterface;
 use Nowhere\AdminUtility\Contracts\MaintenanceServiceInterface;
 use Nowhere\AdminUtility\Contracts\SystemInfoServiceInterface;
 use Nowhere\AdminUtility\Http\Middleware\BypassMaintenance;
+use Nowhere\AdminUtility\Http\Middleware\SecurityHeadersMiddleware;
 use Nowhere\AdminUtility\Routes\AdminUtilityRoutes;
 use Nowhere\AdminUtility\Services\ConsoleCommandService;
 use Nowhere\AdminUtility\Services\CrudService;
@@ -31,7 +31,6 @@ class AdminUtilityServiceProvider extends ServiceProvider
 {
     public function boot()
     {
-        // Only register dynamically if explicitly accessed
         if ($this->shouldBootUtility()) {
             $this->registerRoutes();
             $this->registerViews();
@@ -59,12 +58,10 @@ class AdminUtilityServiceProvider extends ServiceProvider
 
     protected function shouldBootUtility(): bool
     {
-        // Prevent booting via CLI like route:list, view:list, etc.
         if ($this->app->runningInConsole()) {
             return false;
         }
 
-        // Optional condition — only load if request matches certain prefix
         $request = request();
 
         return str_starts_with($request->path(), 'admin-utility') ||
@@ -80,6 +77,7 @@ class AdminUtilityServiceProvider extends ServiceProvider
     {
         $router = $this->app->make(Router::class);
         $router->aliasMiddleware('bypass.maintenance', BypassMaintenance::class);
+        $router->aliasMiddleware('admin-utility.secure-headers', SecurityHeadersMiddleware::class);
     }
 
     protected function registerRoutes(): void
