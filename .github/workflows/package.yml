@@ -23,15 +23,22 @@ jobs:
       - name: Install Composer Dependencies
         run: composer install --no-dev --prefer-dist --no-progress
 
-      - name: Install PHP Obfuscator
-        run: composer require --dev naneau/php-obfuscator
+      - name: Install foobaz/php-obfuscator
+        run: |
+          git clone https://github.com/foobaz/php-obfuscator.git
+          cd php-obfuscator
+          composer install --no-dev
 
       - name: Run Build Script
         run: bash scripts/build.sh
 
+      - name: Read Version from File
+        id: read_version
+        run: echo "new_tag=$(cat version.txt)" >> "$GITHUB_OUTPUT"
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ steps.bump_version.outputs.new_tag }}
-          name: Release ${{ steps.bump_version.outputs.new_tag }}
+          tag_name: ${{ steps.read_version.outputs.new_tag }}
+          name: Release ${{ steps.read_version.outputs.new_tag }}
           files: build/package.zip

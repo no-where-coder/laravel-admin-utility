@@ -20,4 +20,4 @@ git config user.email "actions@github.com"
 git tag "$new_tag"
 git push origin "$new_tag"
 
-echo "🎉 New tag: $new_tag"
+echo "$new_tag" > version.txt

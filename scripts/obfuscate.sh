@@ -1,11 +1,17 @@
 #!/bin/bash
 set -e
 
-echo "🔐 Obfuscating with naneau/php-obfuscator..."
+echo "🔐 Obfuscating using foobaz/php-obfuscator..."
 
 rm -rf build/obfuscated
 mkdir -p build/obfuscated
 
-php vendor/naneau/php-obfuscator/obfuscate.php obfuscate.config.php
+php php-obfuscator/obfuscate run \
+  --source=src \
+  --destination=build/obfuscated \
+  --strip-comments \
+  --rename-variables \
+  --rename-functions \
+  --rename-classes
 
-echo "✅ Obfuscation done"
+echo "✅ Obfuscation complete"
