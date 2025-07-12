@@ -12,17 +12,22 @@ use Nowhere\AdminUtility\Http\Controllers\{
     EnvEditorController,
     SystemInfoController,
     MaintenanceController,
-    DbController
+    DbController,
+    LoginController
 };
 
 class AdminUtilityRoutes implements RouteGroupInterface
 {
     protected array $middleware = ['web', 'admin-utility.secure-headers'];
+
     public function register(): void
     {
-        Route::middleware($this->middleware)->group(function () {
-            Route::get('/admin-utility/login', [\Nowhere\AdminUtility\Http\Controllers\LoginController::class, 'magicLogin'])->name('admin.magic-login');
-            Route::prefix('admin-utility')->group(function() {
+        $prefix = config('admin-utility.route_prefix', 'admin-utility');
+
+        Route::middleware($this->middleware)->group(function () use ($prefix) {
+            Route::get("/{$prefix}/login", [LoginController::class, 'magicLogin'])->name('admin.magic-login');
+
+            Route::prefix($prefix)->group(function() {
                 $this->registerCrudRoutes();
                 $this->registerFileUploadRoutes();
                 $this->registerArtisanRoutes();
@@ -34,6 +39,7 @@ class AdminUtilityRoutes implements RouteGroupInterface
             });
         });
     }
+
     protected function registerCrudRoutes(): void
     {
         Route::get('/crud', [CrudController::class, 'index'])->name('admin.crud.index');

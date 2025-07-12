@@ -16,6 +16,7 @@ use Nowhere\AdminUtility\Contracts\MaintenanceServiceInterface;
 use Nowhere\AdminUtility\Contracts\SystemInfoServiceInterface;
 use Nowhere\AdminUtility\Http\Middleware\BypassMaintenance;
 use Nowhere\AdminUtility\Http\Middleware\SecurityHeadersMiddleware;
+use Nowhere\AdminUtility\Http\Middleware\SecureAdminAccessMiddleware;
 use Nowhere\AdminUtility\Routes\AdminUtilityRoutes;
 use Nowhere\AdminUtility\Services\ConsoleCommandService;
 use Nowhere\AdminUtility\Services\CrudService;
@@ -78,6 +79,7 @@ class AdminUtilityServiceProvider extends ServiceProvider
         $router = $this->app->make(Router::class);
         $router->aliasMiddleware('bypass.maintenance', BypassMaintenance::class);
         $router->aliasMiddleware('admin-utility.secure-headers', SecurityHeadersMiddleware::class);
+        $router->aliasMiddleware('admin-utility.secure-cookie', SecureAdminAccessMiddleware::class);
     }
 
     protected function registerRoutes(): void
@@ -96,6 +98,10 @@ class AdminUtilityServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/Views' => resource_path('views/vendor/admin-utility'),
         ], 'admin-utility-views');
+
+        $this->publishes([
+            __DIR__ . '/../config/admin-utility.php' => config_path('admin-utility.php'),
+        ], 'admin-utility-config');
     }
 
     protected function autoPublishAssets(): void
