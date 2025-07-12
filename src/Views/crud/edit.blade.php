@@ -1,10 +1,11 @@
-{{-- File: resources/views/vendor/admin-utility/crud/edit.blade.php --}}
 @extends('admin-utility::layout')
 
 @section('content')
-    <h2 class="text-xl font-bold mb-4">Edit Record #{{ $record->id }} in <code>{{ $table }}</code></h2>
+    <div class="mb-6">
+        <h2 class="text-2xl font-semibold text-gray-800">✏️ Edit Record #{{ $record->id }} in <code>{{ $table }}</code></h2>
+    </div>
 
-    <form method="POST" action="{{ route('admin.crud.update', [$table, $record->id]) }}" class="space-y-4">
+    <form method="POST" action="{{ route('admin.crud.update', [$table, $record->id]) }}" class="space-y-5">
         @csrf
         @method('PUT')
 
@@ -14,12 +15,15 @@
             @endif
 
             <div>
-                <label class="block font-medium mb-1">{{ ucfirst(str_replace('_', ' ', $column)) }}</label>
-                <input type="text" name="{{ $column }}" class="w-full border px-3 py-2 rounded"
-                    value="{{ old($column, $record->$column) }}">
+                <label class="block mb-1 text-sm font-medium">{{ ucfirst(str_replace('_', ' ', $column)) }}</label>
+                <input type="text" name="{{ $column }}"
+                       value="{{ old($column, $record->$column) }}"
+                       class="w-full border rounded px-3 py-2 text-sm">
             </div>
         @endforeach
 
-        <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded">Update</button>
+        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+            ✅ Update
+        </button>
     </form>
 @endsection

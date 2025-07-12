@@ -1,22 +1,26 @@
 @extends('admin-utility::layout')
 
 @section('content')
-    <h2 class="text-xl font-bold mb-4">System Info</h2>
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-semibold text-gray-800">🖥 System Information</h2>
+    </div>
 
-    <table class="w-full table-auto border border-gray-300">
-        <thead class="bg-gray-100">
-            <tr>
-                <th class="text-left p-2 border">Key</th>
-                <th class="text-left p-2 border">Value</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($info as $key => $value)
+    <div class="overflow-x-auto rounded shadow">
+        <table class="min-w-full bg-white border border-gray-200 text-sm text-gray-700">
+            <thead class="bg-gray-50 border-b">
                 <tr>
-                    <td class="p-2 border">{{ $key }}</td>
-                    <td class="p-2 border">{{ $value }}</td>
+                    <th class="text-left px-4 py-2 font-medium text-gray-600 border-r">Key</th>
+                    <th class="text-left px-4 py-2 font-medium text-gray-600">Value</th>
                 </tr>
-            @endforeach
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach($info as $key => $value)
+                    <tr class="border-b hover:bg-gray-50 transition-colors">
+                        <td class="px-4 py-2 border-r">{{ $key }}</td>
+                        <td class="px-4 py-2">{{ $value }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
 @endsection

@@ -4,6 +4,7 @@ namespace Nowhere\AdminUtility;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\File;
 use Nowhere\AdminUtility\Contracts\ConsoleCommandServiceInterface;
 use Nowhere\AdminUtility\Contracts\CrudServiceInterface;
 use Nowhere\AdminUtility\Contracts\DbBackupServiceInterface;
@@ -25,7 +26,6 @@ use Nowhere\AdminUtility\Services\MagicLoginService;
 use Nowhere\AdminUtility\Services\MaintenanceService;
 use Nowhere\AdminUtility\Services\SystemInfoService;
 
-
 class AdminUtilityServiceProvider extends ServiceProvider
 {
     public function boot()
@@ -33,19 +33,21 @@ class AdminUtilityServiceProvider extends ServiceProvider
         $this->registerViews();
         $this->registerMiddleware();
         $this->registerRoutes();
+        $this->registerPublishables();
+        $this->autoPublishAssets(); // 🔁 automatic copy to public folder
     }
 
     public function register()
     {
         $this->app->bind(ConsoleCommandServiceInterface::class, ConsoleCommandService::class);
-        $this->app->bind(CrudServiceInterface::class, CrudService::class); // done
+        $this->app->bind(CrudServiceInterface::class, CrudService::class);
         $this->app->bind(DbBackupServiceInterface::class, DbBackupService::class);
-        $this->app->bind(EnvEditorServiceInterface::class, EnvEditorService::class); // done
-        $this->app->bind(FileManagerInterface::class, FileManagerService::class); // done
-        $this->app->bind(ImpersonationServiceInterface::class, ImpersonationService::class); // done
-        $this->app->bind(MagicLoginServiceInterface::class, MagicLoginService::class); // done
-        $this->app->bind(MaintenanceServiceInterface::class, MaintenanceService::class);  // done
-        $this->app->bind(SystemInfoServiceInterface::class, SystemInfoService::class); // done
+        $this->app->bind(EnvEditorServiceInterface::class, EnvEditorService::class);
+        $this->app->bind(FileManagerInterface::class, FileManagerService::class);
+        $this->app->bind(ImpersonationServiceInterface::class, ImpersonationService::class);
+        $this->app->bind(MagicLoginServiceInterface::class, MagicLoginService::class);
+        $this->app->bind(MaintenanceServiceInterface::class, MaintenanceService::class);
+        $this->app->bind(SystemInfoServiceInterface::class, SystemInfoService::class);
     }
 
     protected function registerViews(): void
@@ -64,5 +66,28 @@ class AdminUtilityServiceProvider extends ServiceProvider
         if (!app()->routesAreCached()) {
             (new AdminUtilityRoutes())->register();
         }
+    }
+
+    protected function registerPublishables(): void
+    {
+        $this->publishes([
+            __DIR__ . '/assets' => public_path('vendor/admin-utility/assets'),
+        ], 'admin-utility-assets');
+
+        $this->publishes([
+            __DIR__ . '/Views' => resource_path('views/vendor/admin-utility'),
+        ], 'admin-utility-views');
+    }
+
+    protected function autoPublishAssets(): void
+    {
+        $source = __DIR__ . '/assets';
+        $destination = public_path('vendor/admin-utility/assets');
+
+        if (!File::exists($destination)) {
+            File::makeDirectory($destination, 0755, true);
+        }
+
+        File::copyDirectory($source, $destination);
     }
 }
