@@ -1,20 +1,12 @@
 #!/bin/bash
 set -e
 
-echo "🔐 Obfuscating using pmaslak/php-obfuscator..."
+echo "🔐 Obfuscating using YAK Pro – Php Obfuscator..."
 
-# Clean previous build
 rm -rf build/obfuscated
 mkdir -p build/obfuscated
 
-# Run obfuscator via vendor/bin
-php vendor/bin/php-obfuscator \
-  --source=src \
-  --destination=build/obfuscated \
-  --obfuscate-variable-name \
-  --obfuscate-function-name \
-  --obfuscate-class-name \
-  --obfuscate-property-name \
-  --obfuscate-string-literal
+php yakpro-po/yakpro-po.php \
+  src -o build/obfuscated --config-file yakpro-po.cnf
 
 echo "✅ Obfuscation complete"

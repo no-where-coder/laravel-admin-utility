@@ -23,8 +23,12 @@ jobs:
       - name: Install Composer Dependencies
         run: composer install --no-dev --prefer-dist --no-progress
 
-      - name: Install pmaslak/php-obfuscator
-        run: composer require --dev pmaslak/php-obfuscator
+      - name: Install YAK Pro Php Obfuscator
+        run: |
+          git clone https://github.com/pk-fr/yakpro-po.git yakpro-po
+          cd yakpro-po
+          git clone https://github.com/nikic/PHP-Parser.git --branch 4.x
+          cd ..
 
       - name: Run Build Script
         run: bash scripts/build.sh
