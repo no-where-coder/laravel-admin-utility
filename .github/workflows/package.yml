@@ -1,0 +1,79 @@
+name: Build & Release Composer Package
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Install Composer Dependencies
+        run: composer install --no-dev --prefer-dist --no-progress
+
+      - name: Bump Version Automatically
+        run: |
+          bash scripts/version-bump.sh
+
+      - name: Read Version from File
+        id: read_version
+        run: echo "new_tag=$(cat version.txt)" >> "$GITHUB_OUTPUT"
+
+      - name: Fetch Tags (ensure latest pushed tag is available)
+        run: git fetch --tags
+
+      - name: Create ZIP Archive of Code
+        run: |
+          mkdir -p build
+          zip -r build/package.zip . -x "*.git*" "build/*" "*.github*" "vendor/*" "*.DS_Store"
+
+      - name: Update Release Branch with Original Code
+        if: github.event_name == 'push'
+        run: |
+          git config user.name "nowhere"
+          git config user.email "no.where.coder@gmail.com"
+
+          git checkout -b release || git checkout release
+
+          # Remove everything except .git and build/package.zip
+          find . -maxdepth 1 -not -path './.git' -not -path '.' -not -path './build' -exec rm -rf {} +
+
+          # Unzip original package
+          unzip -o build/package.zip
+
+          rm -rf build
+
+          git add --all
+          git commit -m "Release ${{ steps.read_version.outputs.new_tag }}" || echo "No changes to commit"
+
+          git tag -d ${{ steps.read_version.outputs.new_tag }} || true
+          git push origin :refs/tags/${{ steps.read_version.outputs.new_tag }} || true
+
+          git tag ${{ steps.read_version.outputs.new_tag }}
+          git push origin release --tags --force
+
+      - name: Create GitHub Release
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.read_version.outputs.new_tag }}
+          name: Release ${{ steps.read_version.outputs.new_tag }}
+          files: build/package.zip
